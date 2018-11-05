@@ -1,0 +1,101 @@
+# Build a service with environment variables
+version: '1.0'
+
+steps:
+  init_variables:
+    title: Initializing variables...
+    image: alpine
+    commands:
+      - cf_export MASTER_BRANCH=master
+      - cf_export BUILD_HARNESS_VERSION=0.5.5
+      - cf_export HUGO_CONFIG=deploy.toml
+      - cf_export HTMLTEST_CONFIG=.htmltest.codefresh.yml
+      - cf_export TMPDIR=/codefresh/volume
+
+  semver:
+    title: Export semantic version
+    image: cloudposse/build-harness:${{BUILD_HARNESS_VERSION}}
+    working_directory: ./
+    commands:
+      - make git/show
+      - make git/export | tee -a ${{CF_VOLUME_PATH}}/env_vars_to_export
+      - make semver/show
+      - make semver/export | tee -a ${{CF_VOLUME_PATH}}/env_vars_to_export
+
+  build_image:
+    title: Build image
+    type: build
+    description: Build docs-toolbox image
+    image_name: cloudposse/docs
+    dockerfile: Dockerfile
+
+  build:
+    title: Building Hugo static site...
+    image: '${{build_image}}'
+    working_directory: ./
+    commands:
+      - make lint
+      - make release
+      - make hugo/build
+
+  build_versioned_release:
+    title: Building Hugo static site versioned release...
+    image: '${{build_image}}'
+    working_directory: ./
+    environment:
+      - "HUGO_URL=${{HUGO_URL}}release/${{SEMVERSION_TAG}}"
+      - "HUGO_PUBLISH_DIR=public/release/${{SEMVERSION_TAG}}"
+    commands:
+      - make lint
+      - make release
+      - make hugo/build
+    when:
+      condition:
+        all:
+          executeForTag: "'${{SEMVERSION_TAG}}' != ''"
+
+  test:
+    title: Running tests...
+    image: '${{build_image}}'
+    working_directory: ./
+    environment:
+      - "HUGO_EDIT_BRANCH=${{CF_BRANCH}}"
+    commands:
+      - make lint
+      - make smoketest
+
+  # Only deploy on tagged releases
+  deploy:
+    title: Pushing all artifacts to S3 bucket...
+    image: cloudposse/build-harness:${{BUILD_HARNESS_VERSION}}
+    working_directory: ./
+    commands:
+      - make deploy
+    when:
+      condition:
+        all:
+          executeForTag: "'${{SEMVERSION_TAG}}' != ''"
+
+  # Only reindex on tagged releases
+  reindex:
+    title: Updating algolia search index...
+    image: '${{build_image}}'
+    working_directory: ./
+    commands:
+      - make reindex
+    when:
+      condition:
+        all:
+          executeForTag: "'${{SEMVERSION_TAG}}' != ''"
+
+  # Only invalidate cache on tagged releases
+  invalidate_cache:
+    title: Invalidating CloudFlare cache...
+    image: '${{build_image}}'
+    working_directory: IMAGE_WORK_DIR
+    commands:
+      - make invalidate-cache
+    when:
+      condition:
+        all:
+          executeForTag: "'${{SEMVERSION_TAG}}' != ''"

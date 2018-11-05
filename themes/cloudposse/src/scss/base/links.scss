@@ -1,0 +1,16 @@
+a {
+  color: $color_cape_cod_approx;
+
+  &:hover {
+    color: $color_woodsmoke_approx;
+    text-decoration: underline;
+
+    &.button {
+      text-decoration: none;
+
+      &.green {
+        background-color: $color_fruit_salad_approx;
+      }
+    }
+  }
+}

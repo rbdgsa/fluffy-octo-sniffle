@@ -1,0 +1,42 @@
+html {
+  font-size: 14px;
+}
+body,
+html {
+  font-family: $font_0, $font_1, sans-serif;
+  line-height: 1.4;
+}
+
+strong {
+  font-weight: bold;
+}
+
+.label-default {
+  font-weight: normal;
+}
+
+.hidden {
+  @extend %hidden;
+}
+
+abbr[title] {
+  border-bottom: 1px dotted;
+  text-decoration: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+acronym[title] {
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+label abbr {
+  display: initial;
+}
