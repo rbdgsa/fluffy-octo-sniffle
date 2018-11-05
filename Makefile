@@ -3,9 +3,9 @@ export OS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
 export HUGO ?= hugo
 export HUGO_VERSION ?= 0.42.1
 export HUGO_PORT ?= 1313
-export HUGO_URL ?= http://localhost.cloudposse.com:$(HUGO_PORT)/
+export HUGO_URL ?= http://localhost:$(HUGO_PORT)/
 export HUGO_EDIT_BRANCH ?= $(GIT_BRANCH)
-export HUGO_EDIT_URL ?= https://github.com/cloudposse/docs/blob/$(HUGO_EDIT_BRANCH)
+export HUGO_EDIT_URL ?= https://github.com/rbdgsa/fluffy-octo-sniffle/blob/$(HUGO_EDIT_BRANCH)
 export HUGO_ARGS ?= --bind 0.0.0.0 --port $(HUGO_PORT) --watch --buildDrafts
 export HUGO_CONFIG ?= config.toml
 export HUGO_PUBLISH_DIR ?= public
@@ -20,7 +20,7 @@ export ALGOLIA_ADMIN_KEY ?=
 
 export ASCIINEMA_VERSION ?= 2.6.1
 
-export DOCKER_ORG ?= cloudposse
+export DOCKER_ORG ?= austinsilver
 export DOCKER_IMAGE ?= $(DOCKER_ORG)/docs
 export DOCKER_TAG ?= latest
 export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
